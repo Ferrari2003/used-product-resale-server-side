@@ -38,6 +38,7 @@ async function run() {
         const categoriesCollection = client.db('bikeResale').collection('categories');
         const MyOrderCollection = client.db('bikeResale').collection('orders');
         const usersCollection = client.db('bikeResale').collection('users');
+        const productCollection = client.db('bikeResale').collection('product');
 
         app.get('/', async (req, res) => {
             const query = {}
@@ -52,6 +53,12 @@ async function run() {
             res.send(category);
         });
 
+        app.get('/categorySpecial', async(req, res) => {
+            const query = {}
+            const result = await categoriesCollection.find(query).project({title:1}).toArray();
+            res.send(result)
+        })
+
         app.get('/bookings',verifyJWT, async (req, res) => {
             const email = req.query.email;
             const decodedEmail = req.decoded.email;
@@ -63,8 +70,7 @@ async function run() {
             const query = { email: email };
             const bookings = await MyOrderCollection.find(query).toArray();
             res.send(bookings);
-        });
-        
+        });        
 
         app.post('/bookings', async (req, res) => {
             const booking = req.body;
@@ -123,6 +129,12 @@ async function run() {
             }
             const result = await usersCollection.updateOne(filter, updateDoc,options);
             res.send(result);
+        });
+
+        app.post('/product', async(req, res)=> {
+            const product = req.body;
+            const result =await productCollection.insertOne(product);
+            res.send(result)
         })
 
     }
