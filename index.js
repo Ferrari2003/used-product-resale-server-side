@@ -36,7 +36,7 @@ function verifyJWT(req, res, next){
 async function run() {
     try {
         const categoriesCollection = client.db('bikeResale').collection('categories');
-        const bookingsCollection = client.db('bikeResale').collection('bookings');
+        const MyOrderCollection = client.db('bikeResale').collection('orders');
         const usersCollection = client.db('bikeResale').collection('users');
 
         app.get('/', async (req, res) => {
@@ -61,13 +61,14 @@ async function run() {
             }
 
             const query = { email: email };
-            const bookings = await bookingsCollection.find(query).toArray();
+            const bookings = await MyOrderCollection.find(query).toArray();
             res.send(bookings);
-        })
+        });
+        
 
         app.post('/bookings', async (req, res) => {
             const booking = req.body;
-            const result = await bookingsCollection.insertOne(booking);
+            const result = await MyOrderCollection.insertOne(booking);
             res.send(result)
         });
 
@@ -80,11 +81,47 @@ async function run() {
                 return res.send({accessToken: token});
             }
             res.status(403).send({ accessToken: '' })
-        })
+        });
+
+        app.get('/users', async(req, res)=> {
+            const query = {};
+            const users = await usersCollection.find(query).toArray();
+            res.send(users)
+        });
+
+        app.get('/users/admin/:email', async (req, res)=> {
+            const email= req.params.email;
+            const query = {email}
+            const user = await usersCollection.findOne(query);
+            res.send({isAdmin: user?.role === 'admin'});
+        });
 
         app.post('/users', async (req, res) => {
             const user = req.body;
             const result = await usersCollection.insertOne(user);
+            res.send(result);
+        });
+
+        app.put('/users/admin/:id',verifyJWT, async(req, res)=> {
+            const decodedEmail = req.decoded.email;
+            const query = {email: decodedEmail};
+            const user = await usersCollection.findOne(query);
+
+            if(user?.role !== 'admin'){
+                return res.status(403).send({message: 'forbidden access'})
+            }
+
+            const id =req.params.id;
+            console.log(id)
+            const filter = {_id: ObjectId(id)}
+            const options = {upsert: true};
+            const updateDoc = {
+                $set:{
+                    role:'admin'
+                    
+                }
+            }
+            const result = await usersCollection.updateOne(filter, updateDoc,options);
             res.send(result);
         })
 
