@@ -43,7 +43,7 @@ async function run() {
 
         // make sure you verifyAdmin verifyHWT
         const verifyAdmin = async (req, res, next) => {
-            
+
             const decodedEmail = req.decoded.email;
             const query = { email: decodedEmail };
             const user = await usersCollection.findOne(query);
@@ -86,9 +86,9 @@ async function run() {
             res.send(bookings);
         });
 
-        app.get('/MyOrders/:id', async(req, res) => {
+        app.get('/MyOrders/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: ObjectId(id)};
+            const query = { _id: ObjectId(id) };
             const MyOrders = await MyOrderCollection.findOne(query);
             res.send(MyOrders);
         })
@@ -157,19 +157,19 @@ async function run() {
 
         // })
 
-        app.get('/addOrders', verifyJWT,verifyAdmin, async (req, res) => {
+        app.get('/addOrders', verifyJWT, verifyAdmin, async (req, res) => {
             const query = {};
             const products = await productCollection.find(query).toArray();
             res.send(products)
         })
 
-        app.post('/product', verifyJWT,verifyAdmin, async (req, res) => {
+        app.post('/product', verifyJWT, verifyAdmin, async (req, res) => {
             const product = req.body;
             const result = await productCollection.insertOne(product);
             res.send(result)
         });
 
-        app.delete('/addOrders/:id', verifyJWT,verifyAdmin, async (req, res) => {
+        app.delete('/addOrders/:id', verifyJWT, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: ObjectId(id) };
             const result = await productCollection.deleteOne(filter);
