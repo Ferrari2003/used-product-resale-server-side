@@ -43,7 +43,7 @@ async function run() {
 
         // make sure you verifyAdmin verifyHWT
         const verifyAdmin = async (req, res, next) => {
-            console.log('inside verifyAdmin', req.decoded.email)
+            
             const decodedEmail = req.decoded.email;
             const query = { email: decodedEmail };
             const user = await usersCollection.findOne(query);
@@ -85,6 +85,13 @@ async function run() {
             const bookings = await MyOrderCollection.find(query).toArray();
             res.send(bookings);
         });
+
+        app.get('/MyOrders/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const MyOrders = await MyOrderCollection.findOne(query);
+            res.send(MyOrders);
+        })
 
         app.post('/bookings', async (req, res) => {
             const booking = req.body;
@@ -136,6 +143,19 @@ async function run() {
             const result = await usersCollection.updateOne(filter, updateDoc, options);
             res.send(result);
         });
+
+        // app.get('/addPrice', async(req, res)=> {
+        //     const filter = {}
+        //     const options = {upsert: true}
+        //     const updateDoc = {
+        //         $set: {
+        //             price: 150000
+        //         }
+        //     }
+        //     const result =await categoriesCollection.updateMany(filter,updateDoc,options)
+        //     res.send(result)
+
+        // })
 
         app.get('/addOrders', verifyJWT,verifyAdmin, async (req, res) => {
             const query = {};
